@@ -92,7 +92,7 @@ class DecimalNumber:
         else:
             raise DecimalNumberExceptionBadInit(
                 "Only 'int' or 'str' instances are allowed for initialization")
-
+    
     @classmethod
     def pi(cls) -> "DecimalNumber":
         """Calculation of PI using the very fast algorithm present on the
@@ -151,7 +151,7 @@ class DecimalNumber:
             one = DecimalNumber(1)
             while e2 != e:
                 e2.copy_from(e)
-                i += one		# counter
+                i += one        # counter
                 f *= i
                 t = one / f
                 e += t
@@ -234,7 +234,7 @@ class DecimalNumber:
             one = DecimalNumber(1)
             while e2 != e:
                 e2.copy_from(e)
-                i += one		# counter
+                i += one        # counter
                 x *= n
                 f *= i
                 t = x / f
@@ -545,6 +545,10 @@ class DecimalNumber:
         
         DecimalNumber.set_scale(scale)
         return +r
+    
+    def degrees(self) -> "DecimalNumber":
+        """Convert radians to degrees."""
+        return (self * 180) / self.pi()
 
     @staticmethod
     def version() -> str:
