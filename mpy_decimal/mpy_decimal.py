@@ -1,3 +1,44 @@
+"""
+
+MicroPython Decimal module.
+
+=============================================================================
+
+Original from:
+https://github.com/mpy-dev/micropython-decimal-number/tree/main
+
+original has been expanded with a few features:
+- DecimalNumber allows float, and DecimalNumber as input
+- Quite a few math dunders have been given conversions to allow them to
+  work with int/float types
+- Added methods for quickly converting DecimalNumber to other types
+
+=============================================================================
+
+MIT License
+
+Copyright (c) 2024 Ethan Lacasse
+Copyright (c) 2021 mpy-dev
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
+
 import sys
 
 if sys.implementation.name == "cpython":        # micropython does not include 'typing' module
@@ -30,6 +71,13 @@ class DecimalNumber:
         3) Two integers => number and decimals. Example: Decimal(12345, 3) => Number = 12.345
         4) One string that contains the number. Example: Decimal("12.345") => Number = 12.345
         """
+        # add support for float conversion
+        if type(number) == float:
+            number = str(number)
+        # support for decimalnumber inputs
+        if type(number) == DecimalNumber:
+            number = str(number)
+        
         if isinstance(number, int):
             self._is_positive: bool = (number >= 0)
             self._number: int = number if number >= 0 else -number
@@ -681,7 +729,7 @@ class DecimalNumber:
         """Adds two DecimalNumber.
         Returns (self + other)
         """
-        if isinstance(other, int):
+        if isinstance(other, (int, float, str)):
             other = DecimalNumber(other)
 
         #   123 + 456       : 123
@@ -752,6 +800,10 @@ class DecimalNumber:
     def __sub__(self, other: "DecimalNumber") -> "DecimalNumber":
         if isinstance(other, int):
             other = DecimalNumber(other)
+            
+        if isinstance(other, float):
+            other = DecimalNumber(str(other))
+            
         s = other.clone()
         s._is_positive = not s._is_positive
         return self.__add__(s)
@@ -767,7 +819,7 @@ class DecimalNumber:
         return DecimalNumber(other).__sub__(self)
 
     def __mul__(self, other: "DecimalNumber") -> "DecimalNumber":
-        if isinstance(other, int):
+        if isinstance(other, (int, float, str)):
             other = DecimalNumber(other)
         a_integer: int = self._number if self._is_positive else -self._number
         b_integer: int = other._number if other._is_positive else -other._number
@@ -897,7 +949,10 @@ class DecimalNumber:
             other = DecimalNumber(other)
         n1, n2 = DecimalNumber._make_integer_comparable(self, other)
         return (n1 >= n2)
-
+    
+    def __float__(self) -> float:
+        return float(str(self))
+    
     def __str__(self, thousands: bool = False) -> str:
         #   Integer / Decimals: String
         #   12345 / 0: 12345
@@ -1101,3 +1156,4 @@ class DecimalNumberExceptionDivisionByZeroError(DecimalNumberException):
 
 if __name__ == "__main__":
     print("DecimalNumber module -", DecimalNumber.VERSION)
+
